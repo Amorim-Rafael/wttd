@@ -2,7 +2,7 @@ from django.test import TestCase
 from eventex.inscricoes.forms import InscricaoForm
 from django.core import mail
 
-class InscreverTest(TestCase):
+class InscreverGet(TestCase):
     def setUp(self):
         self.response = self.client.get('/inscricao/')
 
@@ -15,12 +15,17 @@ class InscreverTest(TestCase):
         self.assertTemplateUsed(self.response, 'inscricoes/inscricao_form.html')
 
     def test_html(self):
-        "Html must contains input tags"
-        self.assertContains(self.response, '<form')
-        self.assertContains(self.response, '<input', 6)
-        self.assertContains(self.response, 'type="text"')
-        self.assertContains(self.response, 'type="email"')
-        self.assertContains(self.response, 'type="submit"')
+        """Html must contains input tags"""
+        tags = (('<form', 1),
+                ('<input', 6),
+                ('type="text"', 3),
+                ('type="email"', 1),
+                ('type="submit"', 1))
+
+        for text, count in tags:
+            with self.subTest():
+                self.assertContains(self.response, text, count)
+        
 
     def test_csrf(self):
         """Html must contains csrf"""
@@ -31,13 +36,8 @@ class InscreverTest(TestCase):
         form = self.response.context['form']
         self.assertIsInstance(form, InscricaoForm)
 
-    def test_has_fields(self):
-        """Form must have 4 fields"""
-        form = self.response.context['form']
-        self.assertSequenceEqual(['name', 'cpf', 'email', 'phone'], list(form.fields))
 
-
-class InscreverPostTest(TestCase):
+class InscreverPostValid(TestCase):
     def setUp(self):
         data = dict(name='Rafael Amorim', cpf='12345678901', 
                     email='rafael@amorim.net', phone='00-99999-9090')
@@ -49,35 +49,9 @@ class InscreverPostTest(TestCase):
 
     def test_send_inscrever_email(self):
         self.assertEqual(1, len(mail.outbox))
+    
 
-    def test_inscricao_email_subject(self):
-        email = mail.outbox[0]
-        expect = 'Confirmação de inscrição'
-
-        self.assertEqual(expect, email.subject)
-
-    def test_inscricao_email_from(self):
-        email = mail.outbox[0]
-        expect = 'contato@eventex.com.br'
-
-        self.assertEqual(expect, email.from_email)
-
-    def test_inscricao_email_to(self):
-        email = mail.outbox[0]
-        expect = ['contato@eventex.com.br', 'rafael@amorim.net']
-
-        self.assertEqual(expect, email.to)
-
-    def test_inscricao_email_body(self):
-        email = mail.outbox[0]
-
-        self.assertIn('Rafael Amorim', email.body)
-        self.assertIn('12345678901', email.body)
-        self.assertIn('rafael@amorim.net', email.body)
-        self.assertIn('00-99999-9090', email.body)
-
-
-class InscriverInvalidPostTest(TestCase):
+class InscriverPostInvalid(TestCase):
     def setUp(self):
         self.response = self.client.post('/inscricao/', {})
     
