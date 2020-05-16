@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/Amorim-Rafael/wttd.svg?branch=master)](https://travis-ci.org/Amorim-Rafael/wttd)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1dd69179087df31db50e/maintainability)](https://codeclimate.com/github/Amorim-Rafael/wttd/maintainability)
+
 # Eventex
 Sistema de Eventos encomendado pela Morena.
 
